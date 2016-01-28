@@ -23,26 +23,37 @@ Check out [W3Schools' SQL Reference](http://www.w3schools.com/sql/sql_syntax.asp
 
 1) Count how many tracks belong to the MediaType "Protected MPEG-4 video file".
 ```SQL
-/* Add your answer below */
+SELECT * FROM tracks; #impossible and stupid to look "manually from here" :)
+\d media_types;
+SELECT * FROM media_types; #indicates that media_type_id for "Protected MPEG-4 video file" is 3
+SELECT * FROM tracks WHERE media_type_id = 3;
 
 ```
 
 2) Find the least expensive Track that has the Genre "Electronica/Dance".
 ```SQL
-/* Add your answer below */
-
+SELECT unit_price FROM tracks; #nope
+SELECT tracks, unit_price FROM tracks;
+SELECT name, album_id, genre_id, unit_price FROM tracks WHERE unit_price < 1;
+\d genre;
+SELECT * FROM genres;
+SELECT name, composer, unit_price FROM tracks WHERE genre_id = 15 AND unit_price < 1;
 ```
 
 3) Find the all the Artists whose names start with A.
 ```SQL
-/* Add your answer below */
-
+SELECT id, name FROM artists WHERE name LIKE 'A%' ORDER BY name ASC; #case sensitive: it will only give "A...s" in this case
+SELECT id, name FROM artists WHERE name ILIKE 'A%' ORDER BY name ASC; #case insentive: it will give you "a...s" & "A...s"
 ```
 
 4) Find all the Tracks that belong to the first Playlist.
 ```SQL
-/* Add your answer below */
-
+SELECT id, name FROM tracks; #nope
+SELECT id, name FROM playlists; #oh no
+SELECT playlist_id FROM playlists_tracks; #et non
+SELECT * FROM tracks JOIN playlists_tracks ON tracks.id = playlists_tracks.track_id WHERE playlists_tracks.playlist_id = 1;
+SELECT name, composer FROM tracks JOIN playlists_tracks ON tracks.id = playlists_tracks.track_id WHERE playlists_tracks.playlist_id = 1;
+SELECT name, composer, unit_price FROM tracks JOIN playlists_tracks ON tracks.id = playlists_tracks.track_id WHERE playlists_tracks.playlist_id = 1;
 ```
 
 ## Active Record Query Interface
@@ -141,27 +152,39 @@ Of course, these can be done as one or more steps.
 
 1) Count how many tracks belong to the "Hip Hop/Rap" genre
 ```ruby
-# Enter your answer below
+genre_id = Genre.find_by(name: "Hip Hop/Rap")
+tracks = Track.find(genre_id = 17) #that's not it but good to know.
+tracks = Track.count(genre_id = 17)
 
 ```
 2) Find the most expensive Track that has the MediaType "MPEG audio file".
 ```ruby
-# Enter your answer below
+MediaType.all #looking for [MediaType id: 1, name: "MPEG audio file"..
+
+#find Tracks => media_type_id = 1 ?
+tracks = Track.find(media_type_id = 1) #ok... but limits to 1 result.
+tracks = Track.where(media_type_id: 1)
+tracks.maximum(:unit_price)
 
 ```
 3) Find the 2 oldest Artists.
 ```ruby
-# Enter your answer below
-
+Artist.minimum(:created_at) #nope. this only gives me a date!
+artist_oldest = Artist.order(created_at: :asc)
+artist_oldest[0]
+artist_oldest[1]
 ```
 4) Find all the Tracks that belong to the first Playlist.
 ```ruby
-# Enter your answer below
-
+Playlist.all
+Playlist.first
+# Track.joins(:playlists).where(playlists: {id: 1})
 ```
 5) Find all the Tracks that belong to the 2 most recent playlists. *(HINT: This takes at least two ActiveRecord queries)*
 ```ruby
-# Enter your answer below
-
+recent = Playlist.order(created_at: :desc)
+recent[0]
+recent[1]
+#another way:
+recent = Playlist.order(created_at: :desc).limit(2)
 ```
-
